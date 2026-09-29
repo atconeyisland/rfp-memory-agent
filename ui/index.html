@@ -1,0 +1,153 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>RFP Memory Agent</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f7f7f5;--card:#fff;--tx:#1c1c1a;--mu:#6b6b66;--bd:#e2e2dc;--ac:#2f5bd8;--ok:#1f7a4d;--wr:#b7791f;--er:#c0362c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--card:#1f1f1d;--tx:#eeeee9;--mu:#9a9a92;--bd:#33332f;--ac:#7c9cff;--ok:#4cc38a;--wr:#e0a93b;--er:#ef6b60}}
+:root[data-theme="dark"]{--bg:#161615;--card:#1f1f1d;--tx:#eeeee9;--mu:#9a9a92;--bd:#33332f;--ac:#7c9cff;--ok:#4cc38a;--wr:#e0a93b;--er:#ef6b60}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;padding:16px}
+h1{font-size:20px;margin:0 0 2px}.sub{color:var(--mu);margin:0 0 14px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center}
+button{font:inherit;padding:7px 12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:8px;cursor:pointer}
+button.on{background:var(--ac);color:#fff;border-color:var(--ac)}button.warn{border-color:var(--wr)}button.bad{border-color:var(--er);color:var(--er)}
+.lbl{color:var(--mu);font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin-right:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin:0 0 8px}
+.draft{font-size:16px}.tag{display:inline-block;font-size:12px;border-radius:99px;padding:1px 8px;border:1px solid var(--bd);margin-right:4px}
+.stale{color:var(--wr);border-color:var(--wr)}.fresh{color:var(--ok);border-color:var(--ok)}.low{color:var(--wr);border-color:var(--wr)}
+.row{padding:6px 0;border-top:1px solid var(--bd)}.row:first-of-type{border-top:0}
+.new{animation:f 1.6s}@keyframes f{from{background:rgba(47,91,216,.2)}to{background:transparent}}
+.v{color:var(--er)}.pass{color:var(--ok)}pre{white-space:pre-wrap;overflow-x:auto;margin:0;font:12px/1.5 ui-monospace,monospace}
+.log{margin-top:14px}
+.shell{max-width:1240px;margin:0 auto}.mast{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin:16px 0 24px}.eyebrow{color:var(--ac);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:0 0 8px}.mast h1{font-size:clamp(28px,4vw,46px);letter-spacing:-.02em;line-height:1.05;margin:0}.sub{max-width:620px;font-size:15px}.signal{display:flex;gap:8px;align-items:center;color:var(--ok);font-size:12px;white-space:nowrap}.dot{width:8px;height:8px;background:var(--ok);border-radius:50%;box-shadow:0 0 0 5px color-mix(in srgb,var(--ok) 16%,transparent)}.source{margin-bottom:14px}.source-grid{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:end}.source textarea{width:100%;min-height:78px;resize:vertical;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);padding:10px;font:14px/1.45 inherit}.source textarea:focus{outline:2px solid color-mix(in srgb,var(--ac) 45%,transparent);border-color:var(--ac)}.source-actions{display:flex;gap:8px;align-items:center}.primary{background:var(--ac);border-color:var(--ac);color:white}.security{margin-top:10px;font-size:12px;color:var(--mu)}.security.alert{color:var(--er)}.metrics{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.metric{background:color-mix(in srgb,var(--ac) 8%,var(--card));border:1px solid var(--bd);border-radius:7px;padding:6px 9px;font-size:12px}.metric b{font-size:15px;margin-right:4px}.trace pre{max-height:330px;overflow:auto}.card{box-shadow:0 10px 30px rgba(0,0,0,.04)}@media(max-width:760px){.mast{display:block}.signal{margin-top:14px}.source-grid{grid-template-columns:1fr}.source-actions button{flex:1}}
+.correction{min-width:min(420px,100%);flex:1;border:1px solid var(--bd);border-radius:8px;padding:7px 9px;background:var(--bg);color:var(--tx);font:inherit}@media(max-width:760px){.correction{min-width:100%}}
+</style></head><body>
+<main class="shell"><header class="mast"><div><p class="eyebrow">Proposal intelligence workspace</p><h1>RFP Memory Agent</h1><p class="sub">Turn institutional memory into a sharper proposal, with every claim checked before it reaches the client.</p></div><div class="signal"><span class="dot"></span><span>Memory guardrails online</span></div></header>
+<div class="bar"><span class="lbl">Client</span><span id="cl"></span></div>
+<div class="bar"><span class="lbl">Question</span><span id="qs"></span></div>
+<section class="card source"><h2>RFP source material</h2><div class="source-grid"><textarea id="rfp" placeholder="Paste an RFP excerpt here. It is treated as source data, never as an instruction to the agent."></textarea><div class="source-actions"><button class="primary" id="analyze">Analyze response</button></div></div><div id="security" class="security">No source text scanned yet.</div></section>
+<div class="grid">
+<div class="card"><h2>Client-facing draft</h2><div id="draft" class="draft"></div>
+<div class="bar" style="margin-top:12px"><input id="correction" class="correction" value="Legacy tier was discontinued last month; Acme is on Enterprise"><button class="warn" id="fix">Record correction</button><button class="bad" id="brk">Break it: hallucinate</button></div></div>
+<div class="card"><h2>Internal · memory trace</h2><div id="trace"></div></div></div>
+<div class="card log"><h2>Verifier</h2><pre id="ver">Choose a client and question to begin.</pre><div id="metrics" class="metrics"></div></div></main>
+<script>
+if(false){
+const NOW=0,ago=d=>-d;
+let facts=[{id:'f1',e:'acme',cat:'personnel',t:"Acme's technical lead is Jordan Chen",age:40},
+{id:'f2',e:'acme',cat:'pricing',t:'Acme was quoted the Legacy tier',age:30},
+{id:'f3',e:'acme',cat:'requirements',t:'Procurement requires 99.95% uptime SLA with credits',age:10}];
+const exps=[['acme','roi_first','won'],['acme','roi_first','won'],['acme','roi_first','won'],['acme','feature_list','lost'],['initech','roi_first','won'],['initech','roi_first','lost']];
+const ENT={acme:'Acme Corp',globex:'Globex (no memory)'};let cur='acme',q='exec',prevFlags=[],recalls=[];
+const conf=(w,n)=>((w+1)/(n+2)).toFixed(2);
+function ops(scope){const src=exps.filter(x=>scope==='org'||x[0]===cur),m={};
+ src.forEach(x=>{const o=m[x[1]]||(m[x[1]]={w:0,n:0});o.w+=x[2]==='won';o.n++});
+ return Object.entries(m).map(([k,o])=>({tag:k,scope,conf:conf(o.w,o.n),n:o.n,w:o.w,low:o.n<3||+conf(o.w,o.n)<.6}))}
+function recall(){const fs=facts.filter(f=>f.e===cur).map(f=>({...f,stale:['pricing','personnel','feature'].includes(f.cat)&&f.age>21&&!f.corr}));
+ const cl=ops('client'),org=cur==='globex'?[]:ops('org');
+ const byc={};fs.forEach(f=>(byc[f.cat]=byc[f.cat]||[]).push(f));
+ const conflicts=Object.entries(byc).filter(([c,a])=>c!=='requirements'&&a.length>1);
+ const fresh=new Set(fs.filter(f=>!f.stale).map(f=>f.cat));
+ const gaps=['pricing','personnel'].filter(c=>!fresh.has(c));
+ const r={entity:cur,fs,cl,org,conflicts,gaps,nExp:exps.filter(x=>x[0]===cur).length,nOp:cl.length,empty:!fs.length&&!cl.length};recalls.push(r);return r}
+function draft(r){const roi=r.cl.find(o=>o.tag==='roi_first');
+ if(r.empty)return q==='exec'?'We propose a phased delivery plan with measurable milestones.':q==='sla'?'We commit to 99.9% monthly availability with service credits.':'We will confirm the technical contact and commercial tier with your team.';
+ if(q==='exec')return 'Executive summary: a 3-year ROI model with a payback timeline leads this response.';
+ if(q==='lead')return 'We will confirm the named technical contact with your team.';
+ const p=r.fs.find(f=>f.cat==='pricing'&&!f.stale);return p?'Pricing is presented on the Enterprise tier.':'We will confirm the commercial tier with your team.'}
+function flags(r){const a=[];if(r.empty)a.push('No prior history on file: drafted from general best practice');
+ r.fs.filter(f=>f.stale).forEach(f=>a.push(`STALE ${f.cat} (${f.age}d): “${f.t}”, confirm before use`));
+ r.conflicts.forEach(([c,x])=>a.push(`CONFLICT in ${c}: `+x.map(y=>`“${y.t}”`).join(' vs ')));
+ if(!r.empty&&r.gaps.length)a.push('No fresh '+r.gaps.join('/')+' fact: please confirm');return a}
+function render(){const r=recall(),fl=flags(r),d=document.getElementById('draft');d.textContent=draft(r);
+ const used=q==='exec'?[...r.cl,...r.org].filter(o=>o.tag==='roi_first'):[];
+ let h=`<div class="row"><b>Recalled</b> ${r.nExp} experiences, ${r.nOp} opinions for <code>${cur}</code></div>`;
+ h+=used.map(o=>`<div class="row">Opinion used: “${o.tag}: ${o.w} of ${o.n} wins” <span class="tag">confidence ${o.conf}</span><span class="tag">n=${o.n}</span>${o.scope==='org'?'<span class="tag">org-wide</span>':''}${o.low?'<span class="tag low">low confidence</span>':''}</div>`).join('');
+ h+=r.fs.map(f=>`<div class="row ${f.corr?'new':''}">${f.t} <span class="tag ${f.stale?'stale':'fresh'}">${f.stale?'stale · '+f.age+'d':'current'}</span>${f.corr?'<span class="tag fresh">human correction</span>':''}</div>`).join('');
+ h+=fl.map(x=>`<div class="row ${prevFlags.includes(x)?'':'new'}" style="color:var(--wr)">⚑ ${x}</div>`).join('')||'<div class="row pass">No flags</div>';
+ document.getElementById('trace').innerHTML=h;prevFlags=fl;
+ const v=verify(d.textContent,r,r.entity);document.getElementById('ver').innerHTML=v.length?v.map(x=>'<span class="v">✗ '+x+'</span>').join('\n'):'<span class="pass">✓ PASS: draft and trace match the recall result</span>'}
+function verify(body,r,e,claim){const v=[];
+ if(claim){const real=[...r.cl,...r.org].map(o=>o.conf+'/'+o.n);if(!real.includes(claim.conf+'/'+claim.n))v.push(`FABRICATED opinion figure: confidence ${claim.conf}, n=${claim.n} not in recall result`)}
+ if(/\d{1,3}\s*%\s*(confiden|chance|likelihood)/i.test(body))v.push('confidence figure leaked into client-facing draft');
+ if(/initech/i.test(body)&&e!=='initech')v.push('cross-client leakage: draft names another client (Initech)');
+ if(/our records|past clients?|hindsight/i.test(body))v.push('internal memory language in client-facing draft');
+ if((r.empty||r.fs.some(f=>f.stale))&&!flags(r).length)v.push('stale/empty condition but no Flags line');
+ r.fs.filter(f=>f.stale).forEach(f=>{const n=(f.t.match(/[A-Z][a-z]+ [A-Z][a-z]+/g)||[]);n.forEach(x=>{if(body.includes(x))v.push(`stale detail “${x}” asserted in draft`)})});return v}
+function btns(id,items,get,set){const el=document.getElementById(id);el.innerHTML='';items.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;b.className=get()===k?'on':'';b.onclick=()=>{set(k);btns(id,items,get,set);render()};el.appendChild(b)})}
+btns('cl',Object.entries(ENT),()=>cur,k=>cur=k);btns('qs',[['exec','Exec summary framing'],['lead','Technical lead'],['price','Pricing tier'],['sla','Uptime SLA']],()=>q,k=>q=k);
+document.getElementById('fix').onclick=()=>{cur='acme';facts=facts.filter(f=>f.id!=='f2');facts.push({id:'f4',e:'acme',cat:'pricing',t:'Legacy tier discontinued last month; Acme is on Enterprise',age:0,corr:true});q='price';btns('cl',Object.entries(ENT),()=>cur,k=>cur=k);btns('qs',[['exec','Exec summary framing'],['lead','Technical lead'],['price','Pricing tier'],['sla','Uptime SLA']],()=>q,k=>q=k);render()};
+document.getElementById('brk').onclick=()=>{const r=recalls[recalls.length-1]||recall();const bad='As we did for Initech, we lead with ROI (93% confidence it works). Jordan Chen will lead.';
+ const v=verify(bad,r,cur,{conf:'0.93',n:12});document.getElementById('ver').innerHTML='<b>Injected bad output:</b> “'+bad+'”\n'+v.map(x=>'<span class="v">✗ '+x+'</span>').join('\n')};
+render();
+}
+</script>
+<script>
+const clients = [['acme', 'Acme Corp'], ['globex', 'Globex (no memory)']];
+const questions = [['exec', 'Executive summary framing'], ['lead', 'Technical lead'], ['price', 'Pricing tier'], ['sla', 'Uptime SLA']];
+let client = 'acme';
+let question = 'exec';
+let lastState = null;
+
+function buttons(id, items, selected, onSelect) {
+	const element = document.getElementById(id);
+	element.replaceChildren(...items.map(([value, label]) => {
+		const button = document.createElement('button');
+		button.textContent = label;
+		button.className = value === selected ? 'on' : '';
+		button.onclick = () => { onSelect(value); render(); };
+		return button;
+	}));
+}
+
+async function fetchState() {
+	const response = await fetch('/api/state', {method: 'POST', headers: {'Content-Type': 'application/json'},
+		body: JSON.stringify({client, question: questions.find(([value]) => value === question)[1],
+			rfp_text: document.getElementById('rfp').value})});
+	if (!response.ok) throw new Error(await response.text());
+	return response.json();
+}
+
+function esc(value) {
+	const element = document.createElement('span');
+	element.textContent = value;
+	return element.innerHTML;
+}
+
+async function render() {
+	buttons('cl', clients, client, value => { client = value; });
+	buttons('qs', questions, question, value => { question = value; });
+	try {
+		lastState = await fetchState();
+		document.getElementById('draft').textContent = lastState.draft;
+		document.getElementById('trace').innerHTML = `<pre>${esc(lastState.trace)}</pre>`;
+		const security = document.getElementById('security');
+		security.className = lastState.security.injection_detected ? 'security alert' : 'security';
+		security.textContent = lastState.security.injection_detected
+			? `Blocked instruction-like text in source: ${lastState.security.matches.join(', ')}`
+			: (lastState.security.scanned ? 'Source scanned: treated as data, not agent instructions.' : 'No source text scanned yet.');
+		const counts = lastState.recall.counts;
+		document.getElementById('metrics').innerHTML = `<span class="metric"><b>${counts.experiences}</b> experiences</span><span class="metric"><b>${counts.opinions}</b> client opinions</span><span class="metric"><b>${counts.org_opinions}</b> org patterns</span><span class="metric"><b>${lastState.recall.memory_gaps.length}</b> open gaps</span>`;
+		document.getElementById('ver').innerHTML = lastState.violations.length
+			? lastState.violations.map(value => `<span class="v">✗ ${esc(value)}</span>`).join('\n')
+			: '<span class="pass">✓ PASS: server draft and trace match recall</span>';
+	} catch (error) {
+		document.getElementById('ver').textContent = `Server unavailable: ${error.message}`;
+	}
+}
+
+document.getElementById('fix').onclick = async () => {
+	const pricing = lastState?.recall?.world_facts?.find(fact => fact.category === 'pricing');
+	await fetch('/api/correction', {method: 'POST', headers: {'Content-Type': 'application/json'},
+		body: JSON.stringify({client, text: document.getElementById('correction').value,
+			item_id: pricing?.id, category: 'pricing'})});
+	client = 'acme'; question = 'price'; render();
+};
+document.getElementById('brk').onclick = () => {
+	const bad = 'As we did for Initech, we lead with ROI (93% confidence it works). Jordan Chen will lead.';
+	document.getElementById('ver').textContent = `Injected bad output is intentionally not sent to the client:\n${bad}`;
+};
+document.getElementById('analyze').onclick = render;
+render();
+</script></body></html>
